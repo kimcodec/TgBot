@@ -25,7 +25,7 @@ func (s *SourcePostgresStorage) Sources(ctx context.Context) ([]model.Source, er
 	defer conn.Close()
 
 	var sources []dbSource
-	if err := conn.SelectContext(ctx, &sources, "SELECT * FROM source"); err != nil {
+	if err := conn.SelectContext(ctx, &sources, "SELECT * FROM sources"); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (s *SourcePostgresStorage) SourceByID(ctx context.Context, id uint64) (*mod
 	defer conn.Close()
 
 	var source dbSource
-	if err := conn.GetContext(ctx, &source, "SELECT * FROM source WHERE id = $1", id); err != nil {
+	if err := conn.GetContext(ctx, &source, "SELECT * FROM sources WHERE id = $1", id); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +74,7 @@ func (s *SourcePostgresStorage) Add(ctx context.Context, source model.Source) (u
 
 	row := conn.QueryRowxContext(
 		ctx,
-		"INSERT INTO source(name, feed_url, created_at) VALUES ($1, $2, $3) RETURNING id",
+		"INSERT INTO sources(name, feed_url, created_at) VALUES ($1, $2, $3) RETURNING id",
 		source.Name,
 		source.FeedURL,
 		source.CreatedAt)
@@ -96,7 +96,7 @@ func (s *SourcePostgresStorage) Delete(ctx context.Context, id uint64) error {
 	}
 	defer conn.Close()
 
-	if _, err := conn.ExecContext(ctx, "DELETE FROM source WHERE id = $1", id); err != nil {
+	if _, err := conn.ExecContext(ctx, "DELETE FROM sources WHERE id = $1", id); err != nil {
 		return err
 	}
 	return nil
