@@ -3,14 +3,15 @@ package notifier
 import (
 	"context"
 	"fmt"
-	"github.com/kimcodec/TgBot/internal/botkit/markup"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
 
-	readability "github.com/go-shiori/go-readability"
+	"github.com/kimcodec/TgBot/internal/botkit/markup"
+
+	"github.com/go-shiori/go-readability"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/kimcodec/TgBot/internal/storage/model"
 )
@@ -28,7 +29,7 @@ type Notifier struct {
 	articles         ArticleProvider
 	summarizer       Summarizer
 	bot              *tgbotapi.BotAPI
-	sendInternal     time.Duration
+	sendInterval     time.Duration
 	lookupTimeWindow time.Duration
 	channelId        int64
 }
@@ -37,7 +38,7 @@ func New(
 	articleProvider ArticleProvider,
 	summarizer Summarizer,
 	bot *tgbotapi.BotAPI,
-	sendInternal time.Duration,
+	sendInterval time.Duration,
 	lookupTimeWindow time.Duration,
 	channelId int64,
 ) *Notifier {
@@ -45,9 +46,29 @@ func New(
 		articles:         articleProvider,
 		summarizer:       summarizer,
 		bot:              bot,
-		sendInternal:     sendInternal,
+		sendInterval:     sendInterval,
 		lookupTimeWindow: lookupTimeWindow,
 		channelId:        channelId,
+	}
+}
+
+func (n *Notifier) Start(ctx context.Context) error {
+	ticker := time.NewTicker(n.sendInterval)
+	defer ticker.Stop()
+
+	if err := n.SelectAndSendArticle(ctx); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ticker.C:
+			if err := n.SelectAndSendArticle(ctx); err != nil {
+				return err
+			}
+		case <-ctx.Done():
+			return ctx.Err()
+		}
 	}
 }
 

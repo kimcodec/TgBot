@@ -11,6 +11,12 @@ type SourcePostgresStorage struct {
 	db *sqlx.DB
 }
 
+func NewSourcePostgresStorage(db *sqlx.DB) *SourcePostgresStorage {
+	return &SourcePostgresStorage{
+		db: db,
+	}
+}
+
 func (s *SourcePostgresStorage) Sources(ctx context.Context) ([]model.Source, error) {
 	conn, err := s.db.Connx(ctx)
 	if err != nil {

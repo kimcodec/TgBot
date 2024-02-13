@@ -11,6 +11,12 @@ type ArticlePostgresStorage struct {
 	db *sqlx.DB
 }
 
+func NewArticlePostgresStorage(db *sqlx.DB) *ArticlePostgresStorage {
+	return &ArticlePostgresStorage{
+		db: db,
+	}
+}
+
 func (s *ArticlePostgresStorage) Store(ctx context.Context, article model.Article) error {
 	conn, err := s.db.Connx(ctx)
 	if err != nil {
