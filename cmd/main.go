@@ -81,10 +81,30 @@ func main() {
 			bot.ViewCmdListSources(sourceStorage),
 		),
 	)
-
+	newsBot.RegisterCmdView(
+		"delete",
+		middleware.AdminOnly(
+			cfg.TelegramChannelID,
+			bot.DeleteSource(sourceStorage),
+		),
+	)
+	newsBot.RegisterCmdView(
+		"update",
+		middleware.AdminOnly(
+			cfg.TelegramChannelID,
+			bot.ViewCmdUpdateSource(sourceStorage),
+		),
+	)
+	newsBot.RegisterCmdView(
+		"source",
+		middleware.AdminOnly(
+			cfg.TelegramChannelID,
+			bot.ViewCmdSourceByID(sourceStorage),
+		),
+	)
 	go func(ctx context.Context) {
 		if err := fetcher.Start(ctx); err != nil {
-			if errors.Is(err, context.Canceled) {
+			if !errors.Is(err, context.Canceled) {
 				log.Printf("[ERROR] failed to start fetcher: %v", err)
 				return
 			}
@@ -93,7 +113,7 @@ func main() {
 
 	go func(ctx context.Context) {
 		if err := notifier.Start(ctx); err != nil {
-			if errors.Is(err, context.Canceled) {
+			if !errors.Is(err, context.Canceled) {
 				log.Printf("[ERROR] failed to start notifier: %v", err)
 				return
 			}
@@ -101,7 +121,7 @@ func main() {
 	}(ctx)
 
 	if err := newsBot.Run(ctx); err != nil {
-		if errors.Is(err, context.Canceled) {
+		if !errors.Is(err, context.Canceled) {
 			log.Printf("[ERROR] failed to start bot: %v", err)
 			return
 		}

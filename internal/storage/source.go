@@ -108,3 +108,20 @@ type dbSource struct {
 	FeedUrl   string    `db:"feed_url"`
 	CreatedAt time.Time `db:"created_at"`
 }
+
+func (s *SourcePostgresStorage) Update(ctx context.Context, source model.Source) error {
+	conn, err := s.db.Connx(ctx)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	if _, err := conn.ExecContext(
+		ctx,
+		"UPDATE sources SET name = $1, feed_url = $2 WHERE id = $3",
+		source.Name, source.FeedURL, source.ID,
+	); err != nil {
+		return err
+	}
+	return nil
+}

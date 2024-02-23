@@ -55,7 +55,6 @@ func New(
 func (n *Notifier) Start(ctx context.Context) error {
 	ticker := time.NewTicker(n.sendInterval)
 	defer ticker.Stop()
-
 	if err := n.SelectAndSendArticle(ctx); err != nil {
 		return err
 	}
@@ -73,7 +72,7 @@ func (n *Notifier) Start(ctx context.Context) error {
 }
 
 func (n *Notifier) SelectAndSendArticle(ctx context.Context) error {
-	topOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-n.lookupTimeWindow), 1)
+	topOneArticles, err := n.articles.AllNotPosted(ctx, time.Now().Add(-24*3*n.lookupTimeWindow), 1)
 	if err != nil {
 		return err
 	}

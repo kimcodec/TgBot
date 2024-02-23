@@ -45,7 +45,8 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 	if err := conn.SelectContext(
 		ctx,
 		&dbArticles,
-		"SELECT * FROM articles WHERE posted_at IS NULL AND published_at >= $1::timestamp ORDER BY published_at DESC LIMIT $2",
+		"SELECT id, source_id, title,link, summary, published_at, created_at FROM articles "+
+			"WHERE posted_at IS NULL AND published_at >= $1::timestamp ORDER BY published_at DESC LIMIT $2",
 		since.UTC().Format(time.RFC3339), limit); err != nil {
 		return nil, err
 	}
@@ -61,7 +62,6 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 				Summary:     v.Summary,
 				PublishedAt: v.PublishedAt,
 				CreatedAt:   v.CreatedAt,
-				PostedAt:    v.PostedAt,
 			})
 	}
 	return articles, nil
@@ -91,5 +91,4 @@ type dbArticle struct {
 	Summary     string    `db:"summary"`
 	PublishedAt time.Time `db:"published_at"`
 	CreatedAt   time.Time `db:"created_at"`
-	PostedAt    time.Time `db:"posted_at"`
 }
