@@ -34,7 +34,7 @@ func (s *ArticlePostgresStorage) Store(ctx context.Context, article model.Articl
 	return nil
 }
 
-func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Time, limit int64) ([]model.Article, error) {
+func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, limit int64) ([]model.Article, error) {
 	conn, err := s.db.Connx(ctx)
 	if err != nil {
 		return nil, err
@@ -46,8 +46,7 @@ func (s *ArticlePostgresStorage) AllNotPosted(ctx context.Context, since time.Ti
 		ctx,
 		&dbArticles,
 		"SELECT id, source_id, title,link, summary, published_at, created_at FROM articles "+
-			"WHERE posted_at IS NULL AND published_at >= $1::timestamp ORDER BY published_at DESC LIMIT $2",
-		since.UTC().Format(time.RFC3339), limit); err != nil {
+			"WHERE posted_at IS NULL ORDER BY published_at DESC LIMIT $1", limit); err != nil {
 		return nil, err
 	}
 
