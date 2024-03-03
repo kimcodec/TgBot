@@ -4,6 +4,7 @@ services:
   db:
     image: postgres:15
     restart: always
+    hostname: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -13,6 +14,8 @@ services:
       - 5432:5432
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+      - tg_bot_net
   bot:
     build:
       context: .
@@ -21,5 +24,10 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    networks:
+      - tg_bot_net
 volumes:
   db:
+networks:
+  tg_bot_net:
+    driver: bridge

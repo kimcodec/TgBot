@@ -1,2 +1,2 @@
-telegram_bot_token="6792468238:AAG6tuk0mWk2hWhOoTggkxNegSmbjTLmLHs"
+telegram_bot_token=""
 telegram_channel_id=-1001920679334
